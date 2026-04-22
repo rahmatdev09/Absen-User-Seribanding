@@ -22,7 +22,7 @@
 
       body {
         font-family: "Plus Jakarta Sans", sans-serif;
-        background: #f8fafc; /* Light Gray Background */
+        background: #f8fafc;
         color: #1e293b;
         overflow: hidden;
         height: 100vh;
@@ -244,33 +244,76 @@
           </div>
         </div>
 
-        <button
-          id="btn-capture"
-          disabled
-          class="h-16 bg-white border border-slate-200 text-slate-400 rounded-3xl font-bold flex items-center justify-center gap-3 uppercase tracking-widest"
+        <div
+          class="h-20 glass-panel rounded-[30px] px-8 flex items-center gap-4 border border-slate-100 shadow-sm"
         >
-          <i data-feather="user-check"></i> Verifikasi Otomatis
-        </button>
+          <div
+            class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg shadow-indigo-200"
+          >
+            <img src="assets/image/bgn.png" />
+          </div>
+          <div class="leading-tight">
+            <h1
+              class="text-lg font-black text-slate-800 tracking-tight uppercase"
+            >
+              SPPG Seribanding
+            </h1>
+            <p
+              class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest"
+            >
+              Jalan Seribanding,
+            </p>
+          </div>
+        </div>
       </div>
 
       <div class="w-1/2 flex flex-col gap-4">
         <div
           class="glass-panel rounded-[40px] p-8 flex flex-col gap-6 flex-1 overflow-hidden"
         >
-          <div class="flex items-center gap-5">
-            <div
-              id="user-avatar-container"
-              class="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center border border-indigo-100"
-            >
-              <i data-feather="user" class="text-indigo-600 w-8 h-8"></i>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-5">
+              <div
+                id="user-avatar-container"
+                class="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center border border-indigo-100"
+              >
+                <i data-feather="user" class="text-indigo-600 w-8 h-8"></i>
+              </div>
+              <div>
+                <h2
+                  id="display-name"
+                  class="text-2xl font-black text-slate-800"
+                >
+                  Selamat Datang
+                </h2>
+                <p
+                  id="display-divisi"
+                  class="text-sm text-slate-400 font-medium"
+                >
+                  Silahkan Scan Kartu
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 id="display-name" class="text-2xl font-black text-slate-800">
-                Selamat Datang
-              </h2>
-              <p id="display-divisi" class="text-sm text-slate-400 font-medium">
-                Silahkan Scan Kartu
-              </p>
+            <div
+              id="battery-status"
+              class="flex flex-col items-end gap-1 px-4 py-2 bg-slate-50 rounded-2xl border border-slate-100"
+            >
+              <div class="flex items-center gap-2">
+                <span
+                  id="battery-level"
+                  class="text-xs font-black text-slate-600"
+                  >--%</span
+                >
+                <i
+                  id="battery-icon"
+                  data-feather="battery"
+                  class="w-4 h-4 text-slate-400"
+                ></i>
+              </div>
+              <span
+                class="text-[8px] font-bold text-slate-400 uppercase tracking-tighter"
+                >Device Power</span
+              >
             </div>
           </div>
 
@@ -319,53 +362,54 @@
             </div>
           </div>
         </div>
-
-        <div
-          class="h-16 glass-panel rounded-3xl px-6 flex items-center justify-between border-l-4 border-indigo-500"
-        >
-          <div class="flex items-center gap-3">
-            <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-            <span
-              class="text-xs font-bold text-slate-600 uppercase tracking-tight"
-              >System Online: HQ-Network</span
-            >
-          </div>
-          <div
-            class="text-[10px] font-black text-indigo-500 uppercase tracking-widest"
-          >
-            Trusted Device
-          </div>
-        </div>
       </div>
     </main>
-
-    <!-- tombol keluara -->
-    <button
-      onclick="handleSecureExit()"
-      class="fixed bottom-4 right-4 w-10 h-10 bg-slate-200 text-slate-400 hover:bg-red-500 hover:text-white rounded-full flex items-center justify-center transition-all shadow-sm z-[100]"
-    >
-      <i data-feather="power" class="w-5 h-5"></i>
-    </button>
 
     <script type="module" src="user.js"></script>
     <script>
       feather.replace();
       const rfidInput = document.getElementById("rfid-listener");
       document.addEventListener("click", () => rfidInput.focus());
+
       setInterval(() => {
         document.getElementById("clock").innerText =
           new Date().toLocaleTimeString("en-GB");
       }, 1000);
-    </script>
 
-    <script>
+      // Battery Logic
+      if ("getBattery" in navigator) {
+        navigator.getBattery().then((battery) => {
+          function updateBattery() {
+            const level = Math.floor(battery.level * 100);
+            document.getElementById("battery-level").innerText = level + "%";
+
+            let icon = "battery";
+            if (battery.charging) icon = "battery-charging";
+            else if (level < 20) icon = "battery";
+
+            const iconElement = document.getElementById("battery-icon");
+            iconElement.setAttribute("data-feather", icon);
+
+            // Warna indikator
+            if (level < 20 && !battery.charging) {
+              iconElement.classList.add("text-red-500");
+            } else {
+              iconElement.classList.remove("text-red-500");
+            }
+            feather.replace();
+          }
+          updateBattery();
+          battery.addEventListener("levelchange", updateBattery);
+          battery.addEventListener("chargingchange", updateBattery);
+        });
+      }
+
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker
           .register("sw.js")
           .then(() => console.log("Service Worker Registered"));
       }
 
-      // Mencegah klik kanan (opsional, agar lebih terasa seperti aplikasi asli)
       document.addEventListener("contextmenu", (event) =>
         event.preventDefault(),
       );
