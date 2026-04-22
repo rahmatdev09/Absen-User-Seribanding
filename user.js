@@ -258,7 +258,8 @@ function resetToHome() {
   document.getElementById("ai-loading").style.display = "none";
   document.getElementById("status-text").innerText = "Mencari Wajah...";
   document.getElementById("display-name").innerText = "Selamat Datang";
-  document.getElementById("display-divisi").innerText = "Sistem Absensi SPPG v1.0";
+  document.getElementById("display-divisi").innerText =
+    "Sistem Absensin SPPG v1.0";
 
   // Pastikan input RFID fokus kembali
   document.getElementById("rfid-listener").focus();
@@ -275,11 +276,26 @@ fetchDashboardData();
 function fetchDashboardData() {
   // --- 1. Ambil Menu & Total Penerima (Koleksi: system, Dokumen: daily_info) ---
   // Pastikan kamu membuat koleksi "system" dan dokumen "daily_info" di Firebase
+  // --- 1. Ambil Menu & Total Penerima ---
   onSnapshot(doc(db, "system", "daily_info"), (snapshot) => {
     if (snapshot.exists()) {
       const data = snapshot.data();
-      document.getElementById("info-menu").innerText =
-        data.menu || "Menu Belum Tersedia";
+      const menuContainer = document.getElementById("info-menu");
+      const rawMenu = data.menu || "Menu Belum Tersedia";
+
+      // Logika Mengubah String menjadi List
+      // Kita asumsikan menu dipisah dengan koma (,) atau baris baru (\n)
+      if (data.menu) {
+        const menuItems = rawMenu.split(/,|\n/);
+        menuContainer.innerHTML = `
+        <ul class="list-disc list-inside text-sm space-y-1">
+          ${menuItems.map((item) => `<li>${item.trim()}</li>`).join("")}
+        </ul>
+      `;
+      } else {
+        menuContainer.innerText = rawMenu;
+      }
+
       document.getElementById("info-penerima").innerText =
         data.total_penerima || "0";
     } else {
