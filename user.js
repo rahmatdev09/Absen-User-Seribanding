@@ -258,7 +258,7 @@ function resetToHome() {
   document.getElementById("ai-loading").style.display = "none";
   document.getElementById("status-text").innerText = "Mencari Wajah...";
   document.getElementById("display-name").innerText = "Selamat Datang";
-  document.getElementById("display-divisi").innerText = "Nexus ID System v2.0";
+  document.getElementById("display-divisi").innerText = "Sistem Absensi SPPG v1.0";
 
   // Pastikan input RFID fokus kembali
   document.getElementById("rfid-listener").focus();
